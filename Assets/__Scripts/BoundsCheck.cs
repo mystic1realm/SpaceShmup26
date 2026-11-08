@@ -1,19 +1,30 @@
+using System;
 using UnityEngine;
+
 
 public class BoundsCheck : MonoBehaviour
 {
-    public enum BoundsType
+
+    [System.Flags]
+    public enum eScreenLocs
     {
-        center,
-        inset,
-        offScreen
+        onScreen = 0b0000, // 0
+        offRight = 0b0001, // 1
+        offLeft = 0b0010, // 2
+        offUp = 0b0100, // 4
+        offDown = 0b1000, // 8
+        offScreen = 0b1111 // 15
     }
 
+    public enum eType { center, inset, outset };
+
     [Header("Inscribed")]
-    public BoundsType boundsType = BoundsType.inset;
+    public eType boundsType = eType.center;
     public float radius = 1f;
+    public bool keepOnScreen = true;
 
     [Header("Dynamic")]
+    public eScreenLocs screenLocs = eScreenLocs.onScreen;
     public float camWidth;
     public float camHeight;
 
@@ -25,45 +36,52 @@ public class BoundsCheck : MonoBehaviour
 
     void LateUpdate()
     {
+        float checkRadius = 0;
+        if (boundsType == eType.inset) { checkRadius = -radius; }
+        if (boundsType == eType.outset) { checkRadius = radius; }
+
         Vector3 pos = transform.position;
+        screenLocs = eScreenLocs.onScreen;
 
-        float offset = 0f;
-
-        switch (boundsType)
+        if (pos.x > camWidth + checkRadius)
         {
-            case BoundsType.center:
-                offset = 0f;
-                break;
-
-            case BoundsType.inset:
-                offset = radius;
-                break;
-
-            case BoundsType.offScreen:
-                offset = -radius;
-                break;
+            pos.x = camWidth + checkRadius;
+            screenLocs |= eScreenLocs.offRight;
         }
 
-        if (pos.x > camWidth - offset)
+        if (pos.x < -camWidth - checkRadius)
         {
-            pos.x = camWidth - offset;
+            pos.x = -camWidth - checkRadius;
+            screenLocs |= eScreenLocs.offLeft;
         }
 
-        if (pos.x < -camWidth + offset)
+        if (pos.y > camHeight + checkRadius)
         {
-            pos.x = -camWidth + offset;
+            pos.y = camHeight + checkRadius;
+            screenLocs |= eScreenLocs.offUp;
         }
 
-        if (pos.y > camHeight - offset)
+        if (pos.y < -camHeight - checkRadius)
         {
-            pos.y = camHeight - offset;
+            pos.y = -camHeight - checkRadius;
+            screenLocs |= eScreenLocs.offDown;
         }
 
-        if (pos.y < -camHeight + offset)
+        if (keepOnScreen && !isOnScreen)
         {
-            pos.y = -camHeight + offset;
+            transform.position = pos;
+            screenLocs = eScreenLocs.offScreen;
         }
+    }
 
-        transform.position = pos;
+    public bool isOnScreen
+    {
+        get { return ( screenLocs == eScreenLocs.onScreen ); }
+    }
+
+    public bool LocIs( eScreenLocs checkLoc)
+    {
+        if ( checkLoc == eScreenLocs.onScreen ) { return isOnScreen; }
+        return ( (screenLocs & checkLoc) == checkLoc );
     }
 }
