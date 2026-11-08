@@ -21,6 +21,12 @@ public class Projectile : MonoBehaviour
 
         if (enemy != null)
         {
+            // Add the enemy's point value to the score
+            if (ScoreManager.S != null)
+            {
+                ScoreManager.S.AddScore(enemy.score);
+            }
+            
             Destroy(enemy.gameObject);
             Destroy(gameObject);
         }
