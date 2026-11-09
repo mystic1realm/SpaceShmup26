@@ -20,7 +20,7 @@ public class Hero : MonoBehaviour
 
     [Header("Dynamic")] [Range(0, 4)]
 
-    public float shieldLevel = 1;
+    public float shieldLevel = 4;
 
     [Header("Audio")]
     public AudioClip laserSound;
@@ -112,6 +112,11 @@ public class Hero : MonoBehaviour
 
             Debug.Log("Game Over!");
             Destroy(gameObject);
+
+            if (GameManager.S != null)
+            {
+                GameManager.S.EndGame();
+            }
         }
         else
         {
