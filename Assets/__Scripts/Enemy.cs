@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     public float fireRate = 0.3f;
     public float health = 10;
     public int score = 100;
+    public GameObject projectilePrefab;
 
     private BoundsCheck bndCheck;
 
@@ -41,5 +42,24 @@ public class Enemy : MonoBehaviour
         Vector3 tempPos = pos;
         tempPos.y -= speed * Time.deltaTime;
         pos = tempPos;
+    }
+
+    void Shoot()
+    {
+        if (projectilePrefab == null)
+        {
+            return;
+        }
+        
+        Vector3 spawnPos = transform.position + Vector3.down * 1.5f;
+        Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+    }
+
+    void Start()
+    {
+        if (projectilePrefab != null && fireRate > 0)
+        {
+            InvokeRepeating(nameof(Shoot), 1f / fireRate, 1f / fireRate);
+        }
     }
 }

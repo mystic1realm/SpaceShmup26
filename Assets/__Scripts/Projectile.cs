@@ -5,6 +5,9 @@ public class Projectile : MonoBehaviour
     public float speed = 25f;
     public float lifetime = 3f;
 
+    // Damage dealt by each laser
+    public float damage = 10f;
+
     void Start()
     {
         Destroy(gameObject, lifetime);
@@ -21,13 +24,22 @@ public class Projectile : MonoBehaviour
 
         if (enemy != null)
         {
-            // Add the enemy's point value to the score
-            if (ScoreManager.S != null)
+            // Reduce enemy health
+            enemy.health -= damage;
+
+            // Only destroy the enemy when health reaches zero
+            if (enemy.health <= 0)
             {
-                ScoreManager.S.AddScore(enemy.score);
+                if (ScoreManager.S != null)
+                {
+                    ScoreManager.S.AddScore(enemy.score);
+                    ScoreManager.S.PlayExplosion();
+                }
+
+                Destroy(enemy.gameObject);
             }
-            
-            Destroy(enemy.gameObject);
+
+            // The projectile disappears after hitting
             Destroy(gameObject);
         }
     }

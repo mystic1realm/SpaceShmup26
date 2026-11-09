@@ -22,8 +22,12 @@ public class Hero : MonoBehaviour
 
     public float shieldLevel = 1;
 
+    [Header("Audio")]
+    public AudioClip laserSound;
+    public AudioClip damageSound;
 
-    // Update is called once per frame
+    private AudioSource audioSource;
+
     void Awake()
     {
         if (S == null)
@@ -34,6 +38,8 @@ public class Hero : MonoBehaviour
         {
             Debug.LogError("Hero.Awake() - Attempted to assign second Hero.S!");
         }
+
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -42,11 +48,13 @@ public class Hero : MonoBehaviour
         float vAxis = Input.GetAxis("Vertical");
 
         Vector3 pos = transform.position;
+
         pos.x += hAxis * speed * Time.deltaTime;
         pos.y += vAxis * speed * Time.deltaTime;
+
         transform.position = pos;
 
-        transform.rotation = Quaternion.Euler(vAxis*pitchMult, hAxis*rollMult, 0);
+        transform.rotation = Quaternion.Euler(vAxis * pitchMult, hAxis * rollMult, 0);
 
         if (Input.GetKey(KeyCode.Space) && Time.time >= nextFireTime)
         {
@@ -55,23 +63,14 @@ public class Hero : MonoBehaviour
         }
     }
 
-      void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         Enemy enemy = other.GetComponentInParent<Enemy>();
 
         if (enemy != null)
         {
-            shieldLevel--;
-
+            TakeDamage();
             Destroy(enemy.gameObject);
-
-            Debug.Log("Hero hit! Shield Level: " + shieldLevel);
-
-            if (shieldLevel <= 0)
-            {
-                Debug.Log("Game Over!");
-                Destroy(gameObject);
-            }
         }
     }
 
@@ -85,5 +84,41 @@ public class Hero : MonoBehaviour
 
         Vector3 spawnPos = transform.position + Vector3.up * 1.5f;
         Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
+
+        if (audioSource != null && laserSound != null)
+        {
+            audioSource.PlayOneShot(laserSound);
+        }
+    }
+
+    // Handles damage from enemies and enemy projectiles
+    public void TakeDamage()
+    {
+        if (shieldLevel <= 0)
+        {
+            return;
+        }
+
+        shieldLevel--;
+
+        Debug.Log("Hero hit! Shield Level: " + shieldLevel);
+
+        if (shieldLevel <= 0)
+        {
+            if (ScoreManager.S != null)
+            {
+                ScoreManager.S.PlayHeroDeath();
+            }
+
+            Debug.Log("Game Over!");
+            Destroy(gameObject);
+        }
+        else
+        {
+            if (audioSource != null && damageSound != null)
+            {
+                audioSource.PlayOneShot(damageSound);
+            }
+        }
     }
 }

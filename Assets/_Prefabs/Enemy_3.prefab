@@ -110,10 +110,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e5caa348dcf46346ae08887728ff2ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 10
-  fireRate: 0.3
-  health: 10
+  speed: 20
+  fireRate: 1.5
+  health: 40
   score: 400
+  projectilePrefab: {fileID: 1466996411124461374, guid: fb66fdc281b67f640834d1dd50755f48, type: 3}
 --- !u!1001 &6256732935604952038
 PrefabInstance:
   m_ObjectHideFlags: 0
